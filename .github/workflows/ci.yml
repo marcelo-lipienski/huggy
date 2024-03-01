@@ -1,0 +1,92 @@
+name: CI
+
+on: push
+
+# Cancels all previous workflow runs for the same branch that have not yet completed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pint:
+    name: 💅 Coding standards (Laravel Pint)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📤 Checkout project
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: redis-5.3.7
+
+      - name: 📦 Install composer dependencies
+        uses: ramsey/composer-install@v2
+
+      - name: ✅ Check code style
+        run: composer lint-test
+  phpstan:
+    name: 🔎 Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📤 Checkout project
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: redis-5.3.7
+
+      - name: 📦 Install composer dependencies
+        uses: ramsey/composer-install@v2
+
+      - name: ✅ Run static analysis
+        run: composer stan
+  phpunit:
+    name: 🐛 Tests (Back-end)
+    runs-on: ubuntu-latest
+    services:
+      # Label used to access the service container
+      pgsql:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: testing
+          POSTGRES_USER: user
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: 📤 Checkout project
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: redis-5.3.7
+
+      - name: 🔢 Create .env file
+        run: cp .env.ci .env
+
+      - name: 📦 Install composer dependencies
+        uses: ramsey/composer-install@v2
+
+      - name: 📦 Install Node dependencies
+        uses: bahmutov/npm-install@v1
+
+      - name: 🔨 Build assets
+        run: npm run build
+
+      - name: 🔑 Generate a laravel key
+        run: php artisan key:generate
+
+      - name: ✅ Run tests
+        run: composer test
