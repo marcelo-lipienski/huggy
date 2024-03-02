@@ -48,8 +48,15 @@ class ReaderController extends Controller
         //
     }
 
-    public function destroy(Reader $reader): void
+    public function destroy(int $id): JsonResponse
     {
-        //
+        try {
+            $reader = Reader::findOrFail($id);
+            $reader->delete();
+
+            return response()->json([], 200);
+        } catch (Exception $e) {
+            return response()->json([], 404);
+        }
     }
 }

@@ -165,4 +165,21 @@ class ReaderControllerTest extends TestCase
         $response = $this->getJson('/api/readers/1');
         $response->assertStatus(404);
     }
+
+    public function test_it_deletes_reader_by_id(): void
+    {
+        $givenReader = Reader::factory()->create();
+
+        $response = $this->deleteJson("/api/readers/{$givenReader->id}");
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing(Reader::class, [
+            'id' => $givenReader->id,
+        ]);
+    }
+
+    public function test_it_returns_error_when_deleting_a_non_existing_readert(): void
+    {
+        $response = $this->deleteJson('/api/readers/1');
+        $response->assertStatus(404);
+    }
 }
