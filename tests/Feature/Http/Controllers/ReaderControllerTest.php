@@ -81,7 +81,7 @@ class ReaderControllerTest extends TestCase
     }
 
     /**
-     * @param array<string, array<string, string>> $givenAttributes
+     * @param  array<string, array<string, string>>  $givenAttributes
      */
     #[DataProvider('invalidReaderAttributesProvider')]
     public function test_it_returns_error_when_creating_reader_with_invalid_attributes(array $givenAttributes): void
@@ -141,5 +141,28 @@ class ReaderControllerTest extends TestCase
                 'birthdate' => fake()->text(),
             ],
         ];
+    }
+
+    public function test_it_returns_reader_by_id(): void
+    {
+        $givenReader = Reader::factory()->create();
+
+        $response = $this->getJson("/api/readers/{$givenReader->id}");
+        $response->assertStatus(200);
+        $response->assertJson(fn (AssertableJson $json) => $json->has('data', fn (AssertableJson $json) => $json
+            ->where('id', $givenReader->id)
+            ->where('name', $givenReader->name)
+            ->where('phone_number', $givenReader->phone_number)
+            ->where('address', $givenReader->address)
+            ->where('birthdate', $givenReader->birthdate)
+            ->etc()
+        )
+        );
+    }
+
+    public function test_it_returns_error_when_reader_does_not_exist(): void
+    {
+        $response = $this->getJson('/api/readers/1');
+        $response->assertStatus(404);
     }
 }

@@ -6,6 +6,8 @@ use App\Http\Requests\StoreReaderRequest;
 use App\Http\Requests\UpdateReaderRequest;
 use App\Http\Resources\ReaderResource;
 use App\Models\Reader;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ReaderController extends Controller
@@ -30,9 +32,15 @@ class ReaderController extends Controller
         return new ReaderResource($reader);
     }
 
-    public function show(Reader $reader): void
+    public function show(int $id): JsonResponse|ReaderResource
     {
-        //
+        try {
+            return new ReaderResource(
+                Reader::findOrFail($id)
+            );
+        } catch (Exception $e) {
+            return response()->json([], 404);
+        }
     }
 
     public function update(UpdateReaderRequest $request, Reader $reader): void
