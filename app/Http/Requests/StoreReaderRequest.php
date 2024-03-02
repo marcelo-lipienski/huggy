@@ -11,7 +11,7 @@ class StoreReaderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,11 @@ class StoreReaderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'phone_number' => ['required', 'numeric'],
+            'address' => ['required', 'string'],
+            'birthdate' => ['required', 'date_format:Y-m-d'],
         ];
     }
 }

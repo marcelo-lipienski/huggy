@@ -5,6 +5,8 @@ namespace Tests\Feature\Http\Controllers;
 use App\Models\Reader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Iterator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ReaderControllerTest extends TestCase
@@ -13,7 +15,7 @@ class ReaderControllerTest extends TestCase
 
     public function test_it_returns_an_empty_list_of_readers(): void
     {
-        $response = $this->get('/api/readers');
+        $response = $this->getJson('/api/readers');
 
         $response->assertStatus(200);
         $response->assertJson([]);
@@ -52,5 +54,92 @@ class ReaderControllerTest extends TestCase
                 ->etc()
             )
         );
+    }
+
+    public function test_it_returns_created_reader(): void
+    {
+        $givenAttributes = [
+            'name' => fake()->name(),
+            'email' => fake()->email(),
+            'phone_number' => '12345678901',
+            'address' => fake()->address(),
+            'birthdate' => fake()->date(),
+        ];
+
+        $response = $this->postJson('/api/readers', $givenAttributes);
+        $response->assertStatus(201);
+        $response->assertJson(fn (AssertableJson $json) => $json->has('data', fn (AssertableJson $json) => $json
+            ->where('name', $givenAttributes['name'])
+            ->where('phone_number', $givenAttributes['phone_number'])
+            ->where('address', $givenAttributes['address'])
+            ->where('birthdate', $givenAttributes['birthdate'])
+            ->etc()
+        )
+        );
+
+        $this->assertDatabaseCount(Reader::class, 1);
+    }
+
+    /**
+     * @param array<string, array<string, string>> $givenAttributes
+     */
+    #[DataProvider('invalidReaderAttributesProvider')]
+    public function test_it_returns_error_when_creating_reader_with_invalid_attributes(array $givenAttributes): void
+    {
+        $response = $this->postJson('/api/readers', $givenAttributes);
+        $response->assertStatus(422);
+    }
+
+    public static function invalidReaderAttributesProvider(): Iterator
+    {
+        yield 'missing name' => [
+            'givenAttributes' => [
+                'name' => '',
+                'email' => fake()->email(),
+                'phone_number' => '12345678901',
+                'address' => fake()->address(),
+                'birthdate' => fake()->date(),
+            ],
+        ];
+
+        yield 'missing email' => [
+            'givenAttributes' => [
+                'name' => fake()->name(),
+                'email' => fake()->text(),
+                'phone_number' => '12345678901',
+                'address' => fake()->address(),
+                'birthdate' => fake()->date(),
+            ],
+        ];
+
+        yield 'invalid phone number' => [
+            'givenAttributes' => [
+                'name' => fake()->name(),
+                'email' => fake()->email(),
+                'phone_number' => fake()->text(),
+                'address' => fake()->address(),
+                'birthdate' => fake()->date(),
+            ],
+        ];
+
+        yield 'invalid address' => [
+            'givenAttributes' => [
+                'name' => fake()->name(),
+                'email' => fake()->email(),
+                'phone_number' => '12345678901',
+                'address' => '',
+                'birthdate' => fake()->date(),
+            ],
+        ];
+
+        yield 'invalid birthdate' => [
+            'givenAttributes' => [
+                'name' => fake()->name(),
+                'email' => fake()->email(),
+                'phone_number' => '12345678901',
+                'address' => fake()->address(),
+                'birthdate' => fake()->text(),
+            ],
+        ];
     }
 }
