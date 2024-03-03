@@ -11,7 +11,7 @@ class UpdateReaderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,11 @@ class UpdateReaderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['sometimes', 'required', 'string'],
+            'email' => ['sometimes', 'required', 'email', 'unique:readers'],
+            'phone_number' => ['sometimes', 'required', 'numeric'],
+            'address' => ['sometimes', 'required', 'string'],
+            'birthdate' => ['sometimes', 'required', 'date_format:Y-m-d'],
         ];
     }
 }

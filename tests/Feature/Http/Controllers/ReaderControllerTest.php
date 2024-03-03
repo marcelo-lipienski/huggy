@@ -80,6 +80,33 @@ class ReaderControllerTest extends TestCase
         $this->assertDatabaseCount(Reader::class, 1);
     }
 
+    public function test_it_fails_to_create_reader_with_an_already_used_email(): void
+    {
+        $givenAttributes = [
+            'name' => fake()->name(),
+            'email' => fake()->email(),
+            'phone_number' => '12345678901',
+            'address' => fake()->address(),
+            'birthdate' => fake()->date(),
+        ];
+
+        $response = $this->postJson('/api/readers', $givenAttributes);
+        $response->assertStatus(201);
+        $response->assertJson(fn (AssertableJson $json) => $json->has('data', fn (AssertableJson $json) => $json
+            ->where('name', $givenAttributes['name'])
+            ->where('phone_number', $givenAttributes['phone_number'])
+            ->where('address', $givenAttributes['address'])
+            ->where('birthdate', $givenAttributes['birthdate'])
+            ->etc()
+        )
+        );
+
+        $response = $this->postJson('/api/readers', $givenAttributes);
+        $response->assertStatus(422);
+
+        $this->assertDatabaseCount(Reader::class, 1);
+    }
+
     /**
      * @param  array<string, array<string, string>>  $givenAttributes
      */
@@ -166,6 +193,52 @@ class ReaderControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
+    public function test_it_updates_reader_by_id(): void
+    {
+        $givenReader = Reader::factory()->create();
+        $givenReaderNewValues = [
+            'name' => fake()->name(),
+            'email' => fake()->email(),
+            'phone_number' => '10987654321',
+        ];
+
+        $response = $this->putJson("/api/readers/{$givenReader->id}", $givenReaderNewValues);
+        $response->assertStatus(200);
+        $response->assertJson(fn (AssertableJson $json) => $json->has('data', fn (AssertableJson $json) => $json
+            ->where('id', $givenReader->id)
+            ->where('name', $givenReaderNewValues['name'])
+            ->where('email', $givenReaderNewValues['email'])
+            ->where('phone_number', $givenReaderNewValues['phone_number'])
+            ->where('address', $givenReader->address)
+            ->where('birthdate', $givenReader->birthdate)
+            ->etc()
+        )
+        );
+
+        $this->assertDatabaseHas(Reader::class, [
+            'id' => $givenReader->id,
+            'name' => $givenReaderNewValues['name'],
+            'email' => $givenReaderNewValues['email'],
+            'phone_number' => $givenReaderNewValues['phone_number'],
+            'address' => $givenReader->address,
+            'birthdate' => $givenReader->birthdate,
+        ]);
+    }
+
+    public function test_it_returns_error_when_updating_a_non_existing_reader(): void
+    {
+        $givenReaderNewValues = [
+            'name' => fake()->name(),
+            'email' => fake()->email(),
+            'phone_number' => '10987654321',
+            'address' => fake()->address(),
+            'birthdate' => fake()->date(),
+        ];
+
+        $response = $this->putJson('/api/readers/1', $givenReaderNewValues);
+        $response->assertStatus(404);
+    }
+
     public function test_it_deletes_reader_by_id(): void
     {
         $givenReader = Reader::factory()->create();
@@ -177,7 +250,7 @@ class ReaderControllerTest extends TestCase
         ]);
     }
 
-    public function test_it_returns_error_when_deleting_a_non_existing_readert(): void
+    public function test_it_returns_error_when_deleting_a_non_existing_reader(): void
     {
         $response = $this->deleteJson('/api/readers/1');
         $response->assertStatus(404);

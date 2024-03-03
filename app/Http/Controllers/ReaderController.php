@@ -43,9 +43,21 @@ class ReaderController extends Controller
         }
     }
 
-    public function update(UpdateReaderRequest $request, Reader $reader): void
+    public function update(UpdateReaderRequest $request, int $id): JsonResponse|ReaderResource
     {
-        //
+        try {
+            $reader = Reader::findOrFail($id);
+        } catch (Exception $e) {
+            return response()->json([], 404);
+        }
+
+        foreach ($request->validated() as $attribute => $newValue) {
+            $reader->$attribute = $newValue;
+        }
+
+        $reader->save();
+
+        return new ReaderResource($reader);
     }
 
     public function destroy(int $id): JsonResponse

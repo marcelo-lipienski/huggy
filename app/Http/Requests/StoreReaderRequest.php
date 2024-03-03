@@ -23,7 +23,7 @@ class StoreReaderRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', 'unique:readers'],
             'phone_number' => ['required', 'numeric'],
             'address' => ['required', 'string'],
             'birthdate' => ['required', 'date_format:Y-m-d'],
