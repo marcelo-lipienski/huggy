@@ -10,7 +10,7 @@ class Reader extends Model
     use HasFactory;
 
     /** @property array<int, string> $fillable */
-    public $fillable = [
+    protected $fillable = [
         'name',
         'email',
         'phone_number',
