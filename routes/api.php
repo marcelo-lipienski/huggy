@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\ReaderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,3 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::resource('readers', ReaderController::class);
+Route::resource('publishers', PublisherController::class);
