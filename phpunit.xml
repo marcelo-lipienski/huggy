@@ -27,5 +27,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="RD_STATION_CRM_TOKEN" value="fake-token"/>
+        <env name="RD_STATION_CRM_ENDPOINT" value="https://crm.rdstation.com/api/v1"/>
     </php>
 </phpunit>
