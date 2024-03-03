@@ -23,11 +23,11 @@ class BookFactory extends Factory
             'title' => fake()->text(),
             'genre' => fake()->word(),
             'author' => fake()->name(),
-            'year' => fake()->year(),
+            'year' => (int) fake()->year(),
             'pages' => fake()->numberBetween(10, 999),
             'language' => fake()->word(),
             'edition' => fake()->numberBetween(1, 99),
-            'isbn' => fake()->isbn13()
+            'isbn' => fake()->isbn13(),
         ];
     }
 }
