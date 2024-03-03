@@ -34,7 +34,7 @@ class ReaderControllerTest extends TestCase
                 ->where('name', $givenThirdReader->name)
                 ->where('phone_number', $givenThirdReader->phone_number)
                 ->where('address', $givenThirdReader->address)
-                ->where('birthdate', $givenThirdReader->birthdate)
+                ->where('birthdate', $givenThirdReader->birthdate->format('Y-m-d'))
                 ->etc()
             )
             ->has('data.1', fn (AssertableJson $json) => $json
@@ -42,7 +42,7 @@ class ReaderControllerTest extends TestCase
                 ->where('name', $givenSecondReader->name)
                 ->where('phone_number', $givenSecondReader->phone_number)
                 ->where('address', $givenSecondReader->address)
-                ->where('birthdate', $givenSecondReader->birthdate)
+                ->where('birthdate', $givenSecondReader->birthdate->format('Y-m-d'))
                 ->etc()
             )
             ->has('data.2', fn (AssertableJson $json) => $json
@@ -50,7 +50,7 @@ class ReaderControllerTest extends TestCase
                 ->where('name', $givenFirstReader->name)
                 ->where('phone_number', $givenFirstReader->phone_number)
                 ->where('address', $givenFirstReader->address)
-                ->where('birthdate', $givenFirstReader->birthdate)
+                ->where('birthdate', $givenFirstReader->birthdate->format('Y-m-d'))
                 ->etc()
             )
         );
@@ -181,7 +181,7 @@ class ReaderControllerTest extends TestCase
             ->where('name', $givenReader->name)
             ->where('phone_number', $givenReader->phone_number)
             ->where('address', $givenReader->address)
-            ->where('birthdate', $givenReader->birthdate)
+            ->where('birthdate', $givenReader->birthdate->format('Y-m-d'))
             ->etc()
         )
         );
@@ -210,7 +210,7 @@ class ReaderControllerTest extends TestCase
             ->where('email', $givenReaderNewValues['email'])
             ->where('phone_number', $givenReaderNewValues['phone_number'])
             ->where('address', $givenReader->address)
-            ->where('birthdate', $givenReader->birthdate)
+            ->where('birthdate', $givenReader->birthdate->format('Y-m-d'))
             ->etc()
         )
         );
@@ -221,7 +221,7 @@ class ReaderControllerTest extends TestCase
             'email' => $givenReaderNewValues['email'],
             'phone_number' => $givenReaderNewValues['phone_number'],
             'address' => $givenReader->address,
-            'birthdate' => $givenReader->birthdate,
+            'birthdate' => $givenReader->birthdate->format('Y-m-d'),
         ]);
     }
 

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\RdStation;
 
+use App\Infrastructure\Interfaces\Api\ContactInterface;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 
-final class Contact
+final class Contact implements ContactInterface
 {
     /** @var array<string, string> */
     private array $headers;
