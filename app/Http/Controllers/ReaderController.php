@@ -7,6 +7,7 @@ use App\Domain\Reader\Jobs\UpdateContact;
 use App\Http\Requests\StoreReaderRequest;
 use App\Http\Requests\UpdateReaderRequest;
 use App\Http\Resources\ReaderResource;
+use App\Models\Book;
 use App\Models\Reader;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -65,6 +66,20 @@ class ReaderController extends Controller
         try {
             $reader = Reader::findOrFail($id);
             $reader->delete();
+
+            return response()->json([], 200);
+        } catch (Exception $e) {
+            return response()->json([], 404);
+        }
+    }
+
+    public function markAsRead(int $id, int $bookId): JsonResponse
+    {
+        try {
+            $reader = Reader::findOrFail($id);
+            $book = Book::findOrFail($bookId);
+
+            $reader->books()->attach($book);
 
             return response()->json([], 200);
         } catch (Exception $e) {
