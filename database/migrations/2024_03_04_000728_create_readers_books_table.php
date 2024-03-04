@@ -14,10 +14,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('readers_books', function (Blueprint $table) {
-            $table->id();
             $table->foreignIdFor(Reader::class);
             $table->foreignIdFor(Book::class);
-            $table->timestamps();
         });
     }
 
