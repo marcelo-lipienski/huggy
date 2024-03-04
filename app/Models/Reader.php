@@ -17,4 +17,8 @@ class Reader extends Model
         'address',
         'birthdate',
     ];
+
+    protected $casts = [
+        'birthdate' => 'datetime:Y-m-d',
+    ];
 }

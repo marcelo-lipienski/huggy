@@ -24,7 +24,7 @@ class ReaderResource extends JsonResource
             'email' => $this->email,
             'phone_number' => $this->phone_number,
             'address' => $this->address,
-            'birthdate' => $this->birthdate,
+            'birthdate' => $this->birthdate->format('Y-m-d'),
         ];
     }
 }
