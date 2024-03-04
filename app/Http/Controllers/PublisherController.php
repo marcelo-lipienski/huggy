@@ -21,11 +21,7 @@ class PublisherController extends Controller
 
     public function store(StorePublisherRequest $request): PublisherResource
     {
-        $publisher = Publisher::create([
-            'name' => $request->input('name'),
-            'code' => $request->input('code'),
-            'phone_number' => $request->input('phone_number'),
-        ]);
+        $publisher = Publisher::create($request->validated());
 
         return new PublisherResource($publisher);
     }
