@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Domain\Reader\Jobs\CreateContact;
+use App\Domain\Reader\Jobs\UpdateContact;
 use App\Models\Reader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -12,6 +15,13 @@ use Tests\TestCase;
 class ReaderControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        Queue::fake([CreateContact::class, UpdateContact::class]);
+    }
 
     public function test_it_returns_an_empty_list_of_readers(): void
     {
@@ -78,6 +88,8 @@ class ReaderControllerTest extends TestCase
         );
 
         $this->assertDatabaseCount(Reader::class, 1);
+
+        Queue::assertPushed(CreateContact::class, 1);
     }
 
     public function test_it_fails_to_create_reader_with_an_already_used_email(): void
@@ -101,10 +113,15 @@ class ReaderControllerTest extends TestCase
         )
         );
 
+        Queue::assertPushed(CreateContact::class, 1);
+
         $response = $this->postJson('/api/readers', $givenAttributes);
         $response->assertStatus(422);
 
         $this->assertDatabaseCount(Reader::class, 1);
+
+        // Still just called CreateContact once (for the first post)
+        Queue::assertPushed(CreateContact::class, 1);
     }
 
     /**
@@ -115,6 +132,8 @@ class ReaderControllerTest extends TestCase
     {
         $response = $this->postJson('/api/readers', $givenAttributes);
         $response->assertStatus(422);
+
+        Queue::assertNotPushed(CreateContact::class);
     }
 
     public static function invalidReaderAttributesProvider(): Iterator
@@ -223,6 +242,8 @@ class ReaderControllerTest extends TestCase
             'address' => $givenReader->address,
             'birthdate' => $givenReader->birthdate->format('Y-m-d'),
         ]);
+
+        Queue::assertPushed(UpdateContact::class, 1);
     }
 
     public function test_it_returns_error_when_updating_a_non_existing_reader(): void
@@ -237,6 +258,8 @@ class ReaderControllerTest extends TestCase
 
         $response = $this->putJson('/api/readers/1', $givenReaderNewValues);
         $response->assertStatus(404);
+
+        Queue::assertNotPushed(UpdateContact::class);
     }
 
     public function test_it_deletes_reader_by_id(): void

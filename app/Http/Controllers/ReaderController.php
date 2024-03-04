@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Reader\Jobs\CreateContact;
+use App\Domain\Reader\Jobs\UpdateContact;
 use App\Http\Requests\StoreReaderRequest;
 use App\Http\Requests\UpdateReaderRequest;
 use App\Http\Resources\ReaderResource;
@@ -28,6 +30,8 @@ class ReaderController extends Controller
             'address' => $request->input('address'),
             'birthdate' => $request->input('birthdate'),
         ]);
+
+        CreateContact::dispatch($reader);
 
         return new ReaderResource($reader);
     }
@@ -56,6 +60,8 @@ class ReaderController extends Controller
         }
 
         $reader->save();
+
+        UpdateContact::dispatch($reader);
 
         return new ReaderResource($reader);
     }
