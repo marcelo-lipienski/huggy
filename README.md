@@ -1,66 +1,87 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Huggy
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Decisions / trade-offs
 
-## About Laravel
+The project was setup to use PHPStan for static analysis at the strictest level, and use Github Actions for CI to check each pull request against coding standards (Laravel Pint), static analysis (PHPStan), and tests (PHPUnit).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+There were several conscious design decisions taken in order to keep development simpler.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- a token is generated when a reader is created
+- token is being shown when viewing/listing readers
+- only requests to mark a book as read are validated against the token
+- address is a string instead of several specific fields (street, number, city...)
+- cache is only created/updated when marking a book as read and thus, it'll not be available for seeded data
+- cache for a reader isn't dropped when a reader is deleted
+- once a birthday email is sent, it's not being marked as sent in order to prevent sending duplicate emails if the job is run more than once in the same day (for example, manually executing it)
+- lots of errors were default to 404s instead of having meaningful error messages and http responses
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+I'm aware those would be critical misses for a real application, but again, those were conscious decisions to keep the scope minimal.
 
-## Learning Laravel
+## Setup / Running
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+To install/run the application, it needs to have any modern PHP version, git, composer, and docker installed locally. All other dependencies are handled by the docker setup.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Clone the repository
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```sh
+git clone git@github.com:marcelo-lipienski/huggy
+```
 
-## Laravel Sponsors
+Move into project's root directory
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```sh
+cd huggy
+```
 
-### Premium Partners
+Copy .env.example into .env
+```sh
+cp .env.example .env
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# You'll need to add your own RD_STATION_CRM_TOKEN to create a contact when a reader is created
+```
 
-## Contributing
+Install depencencies
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```sh
+composer install
+```
 
-## Code of Conduct
+Boot the application using docker
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```sh
+sail up -d
+```
 
-## Security Vulnerabilities
+Run migrations
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```sh
+sail artisan migrate
+```
 
-## License
+**Optional:** Seed database
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```sh
+sail artisan db:seed
+```
+
+Run tests
+
+```sh
+sail tests
+```
+
+**Optional:** Run static analysis
+
+```sh
+sail composer stan
+```
+
+**Optional:** Run code style checker
+
+```sh
+sail pint
+```
+
+For easier manual testing, there's a `huggy-api.json` at project's root directory with requests to all endpoints with some sample data.
+
+Be aware that because I chose to show all errors as 404, trying to delete a publisher that is assigned to a book will throw a 404, that's because before deleting a publisher, all references to that publisher must be deleted from existing books.
