@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
 class Reader extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     /** @property array<int, string> $fillable */
     protected $fillable = [
