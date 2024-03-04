@@ -21,9 +21,9 @@ class BookController extends Controller
 
     public function store(StoreBookRequest $request): BookResource
     {
-        return new BookResource(
-            Book::create($request->validated())
-        );
+        $book = Book::create($request->validated());
+
+        return new BookResource($book);
     }
 
     public function show(int $id): JsonResponse|BookResource

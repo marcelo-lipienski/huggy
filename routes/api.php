@@ -22,5 +22,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::resource('readers', ReaderController::class);
+Route::post('readers/{id}/book/{bookId}', [ReaderController::class, 'markAsRead']);
 Route::resource('publishers', PublisherController::class);
 Route::resource('books', BookController::class);

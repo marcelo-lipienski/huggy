@@ -7,10 +7,12 @@ use App\Domain\Reader\Jobs\UpdateContact;
 use App\Http\Requests\StoreReaderRequest;
 use App\Http\Requests\UpdateReaderRequest;
 use App\Http\Resources\ReaderResource;
+use App\Models\Book;
 use App\Models\Reader;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Redis;
 
 class ReaderController extends Controller
 {
@@ -23,13 +25,7 @@ class ReaderController extends Controller
 
     public function store(StoreReaderRequest $request): ReaderResource
     {
-        $reader = Reader::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'phone_number' => $request->input('phone_number'),
-            'address' => $request->input('address'),
-            'birthdate' => $request->input('birthdate'),
-        ]);
+        $reader = Reader::create($request->validated());
 
         CreateContact::dispatch($reader);
 
@@ -71,6 +67,26 @@ class ReaderController extends Controller
         try {
             $reader = Reader::findOrFail($id);
             $reader->delete();
+
+            return response()->json([], 200);
+        } catch (Exception $e) {
+            return response()->json([], 404);
+        }
+    }
+
+    public function markAsRead(int $id, int $bookId): JsonResponse
+    {
+        try {
+            $reader = Reader::findOrFail($id);
+            $book = Book::findOrFail($bookId);
+
+            $reader->books()->attach($book);
+
+            if (Redis::hexists("reader:{$reader->id}", 'books')) {
+                Redis::hincrby("reader:{$reader->id}", 'books', 1);
+            } else {
+                Redis::hset("reader:{$reader->id}", 'books', 1);
+            }
 
             return response()->json([], 200);
         } catch (Exception $e) {

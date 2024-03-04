@@ -4,9 +4,12 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Domain\Reader\Jobs\CreateContact;
 use App\Domain\Reader\Jobs\UpdateContact;
+use App\Models\Book;
 use App\Models\Reader;
+use App\Models\ReaderBook;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Iterator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -277,5 +280,93 @@ class ReaderControllerTest extends TestCase
     {
         $response = $this->deleteJson('/api/readers/1');
         $response->assertStatus(404);
+    }
+
+    public function test_it_mark_a_book_as_read_for_a_reader(): void
+    {
+        $givenReader = Reader::factory()->create();
+        $givenBook = Book::factory()->create();
+
+        Redis::shouldReceive('hexists')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books')
+            ->andReturn(false);
+
+        Redis::shouldReceive('hset')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books', 1);
+
+        $response = $this->postJson("/api/readers/{$givenReader->id}/book/{$givenBook->id}");
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas(ReaderBook::class, [
+            'reader_id' => $givenReader->id,
+            'book_id' => $givenBook->id,
+        ]);
+    }
+
+    public function test_it_has_read_several_books(): void
+    {
+        $givenReader = Reader::factory()->create();
+        [$givenFirstBook, $givenSecondBook, $givenThirdBook] = Book::factory()->count(3)->create();
+
+        Redis::shouldReceive('hexists')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books')
+            ->andReturn(false);
+
+        Redis::shouldReceive('hset')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books', 1);
+
+        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenFirstBook->id}");
+
+        Redis::shouldReceive('hexists')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books')
+            ->andReturn(true);
+
+        Redis::shouldReceive('hincrby')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books', 1);
+
+        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenFirstBook->id}");
+
+        Redis::shouldReceive('hexists')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books')
+            ->andReturn(true);
+
+        Redis::shouldReceive('hincrby')
+            ->once()
+            ->with("reader:{$givenReader->id}", 'books', 1);
+
+        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenFirstBook->id}");
+    }
+
+    public function test_it_fails_to_mark_a_book_as_read_for_a_reader_when_reader_does_not_exist(): void
+    {
+        $givenBook = Book::factory()->create();
+
+        $response = $this->postJson("/api/readers/9999/book/{$givenBook->id}");
+        $response->assertStatus(404);
+
+        $this->assertDatabaseMissing(ReaderBook::class, [
+            'reader_id' => 9999,
+            'book_id' => $givenBook->id,
+        ]);
+    }
+
+    public function test_it_fails_to_mark_a_book_as_read_for_a_reader_when_book_does_not_exist(): void
+    {
+        $givenReader = Reader::factory()->create();
+
+        $response = $this->postJson("/api/readers/{$givenReader->id}/book/9999");
+        $response->assertStatus(404);
+
+        $this->assertDatabaseMissing(ReaderBook::class, [
+            'reader_id' => $givenReader->id,
+            'book_id' => 9999,
+        ]);
     }
 }
