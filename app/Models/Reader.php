@@ -28,6 +28,6 @@ class Reader extends Model
      */
     public function books(): BelongsToMany
     {
-        return $this->belongsToMany(Book::class, 'readers_books');
+        return $this->belongsToMany(Book::class, 'readers_books', 'reader_id', 'book_id');
     }
 }
