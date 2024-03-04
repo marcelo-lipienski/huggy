@@ -12,6 +12,7 @@ use App\Models\Reader;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Redis;
 
 class ReaderController extends Controller
 {
@@ -80,6 +81,12 @@ class ReaderController extends Controller
             $book = Book::findOrFail($bookId);
 
             $reader->books()->attach($book);
+
+            if (Redis::hexists("reader:{$reader->id}", 'books')) {
+                Redis::hincrby("reader:{$reader->id}", 'books', 1);
+            } else {
+                Redis::hset("reader:{$reader->id}", 'books', 1);
+            }
 
             return response()->json([], 200);
         } catch (Exception $e) {
