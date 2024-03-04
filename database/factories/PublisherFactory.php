@@ -20,7 +20,7 @@ class PublisherFactory extends Factory
         return [
             'name' => fake()->name(),
             'code' => (string) fake()->numberBetween(1000, 9999),
-            'phone_number' => fake()->phoneNumber(),
+            'phone_number' => fake()->e164PhoneNumber(),
         ];
     }
 }
