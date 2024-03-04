@@ -297,7 +297,7 @@ class ReaderControllerTest extends TestCase
                 'pages' => $givenBook->pages,
             ]);
 
-        $response = $this->postJson("/api/readers/{$givenReader->id}/book/{$givenBook->id}");
+        $response = $this->postJson("/api/readers/{$givenReader->id}/book/{$givenBook->id}", ['token' => $givenReader->token]);
         $response->assertStatus(200);
 
         $this->assertDatabaseHas(ReaderBook::class, [
@@ -314,9 +314,9 @@ class ReaderControllerTest extends TestCase
         Cache::shouldReceive('put')
             ->times(3);
 
-        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenFirstBook->id}");
-        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenFirstBook->id}");
-        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenFirstBook->id}");
+        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenFirstBook->id}", ['token' => $givenReader->token]);
+        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenSecondBook->id}", ['token' => $givenReader->token]);
+        $this->postJson("/api/readers/{$givenReader->id}/book/{$givenThirdBook->id}", ['token' => $givenReader->token]);
     }
 
     public function test_it_fails_to_mark_a_book_as_read_for_a_reader_when_reader_does_not_exist(): void
@@ -343,5 +343,14 @@ class ReaderControllerTest extends TestCase
             'reader_id' => $givenReader->id,
             'book_id' => 9999,
         ]);
+    }
+
+    public function test_it_fails_to_mark_a_book_as_read_for_a_reader_when_token_is_wrong(): void
+    {
+        $givenReader = Reader::factory()->create();
+        $givenInvalidToken = 'invalid-token';
+
+        $response = $this->postJson("/api/readers/{$givenReader->id}/book/9999", ['token' => $givenInvalidToken]);
+        $response->assertStatus(404);
     }
 }
