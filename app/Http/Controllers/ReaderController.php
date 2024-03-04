@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Domain\Reader\Jobs\CreateContact;
 use App\Domain\Reader\Jobs\UpdateContact;
+use App\Domain\Reader\Services\MarkBookAsRead;
 use App\Http\Requests\StoreReaderRequest;
 use App\Http\Requests\UpdateReaderRequest;
 use App\Http\Resources\ReaderResource;
@@ -12,7 +13,6 @@ use App\Models\Reader;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Redis;
 
 class ReaderController extends Controller
 {
@@ -80,13 +80,8 @@ class ReaderController extends Controller
             $reader = Reader::findOrFail($id);
             $book = Book::findOrFail($bookId);
 
-            $reader->books()->attach($book);
-
-            if (Redis::hexists("reader:{$reader->id}", 'books')) {
-                Redis::hincrby("reader:{$reader->id}", 'books', 1);
-            } else {
-                Redis::hset("reader:{$reader->id}", 'books', 1);
-            }
+            $markBookAsRead = new MarkBookAsRead($reader, $book);
+            $markBookAsRead->execute();
 
             return response()->json([], 200);
         } catch (Exception $e) {
