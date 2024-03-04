@@ -129,7 +129,7 @@ class PublisherControllerTest extends TestCase
             'givenAttributes' => [
                 'name' => fake()->name(),
                 'code' => (string) fake()->numberBetween(1000, 9999),
-                'phone_number' => fake()->text(),
+                'phone_number' => '',
             ],
         ];
     }

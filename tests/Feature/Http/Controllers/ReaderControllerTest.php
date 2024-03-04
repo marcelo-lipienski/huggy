@@ -165,7 +165,7 @@ class ReaderControllerTest extends TestCase
             'givenAttributes' => [
                 'name' => fake()->name(),
                 'email' => fake()->email(),
-                'phone_number' => fake()->text(),
+                'phone_number' => '',
                 'address' => fake()->address(),
                 'birthdate' => fake()->date(),
             ],

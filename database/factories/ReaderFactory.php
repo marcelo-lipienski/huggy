@@ -20,7 +20,7 @@ class ReaderFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->email(),
-            'phone_number' => fake()->phoneNumber(),
+            'phone_number' => fake()->e164PhoneNumber(),
             'address' => fake()->address(),
             'birthdate' => fake()->date(),
         ];

@@ -24,7 +24,7 @@ class StorePublisherRequest extends FormRequest
         return [
             'name' => ['required', 'string'],
             'code' => ['required', 'string', 'unique:publishers'],
-            'phone_number' => ['required', 'numeric'],
+            'phone_number' => ['required', 'string'],
         ];
     }
 }

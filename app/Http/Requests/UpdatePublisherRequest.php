@@ -24,7 +24,7 @@ class UpdatePublisherRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string'],
             'code' => ['sometimes', 'required', 'string', 'unique:publishers'],
-            'phone_number' => ['sometimes', 'required', 'numeric'],
+            'phone_number' => ['sometimes', 'required', 'string'],
         ];
     }
 }

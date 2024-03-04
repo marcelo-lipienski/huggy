@@ -24,7 +24,7 @@ class UpdateReaderRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string'],
             'email' => ['sometimes', 'required', 'email', 'unique:readers'],
-            'phone_number' => ['sometimes', 'required', 'numeric'],
+            'phone_number' => ['sometimes', 'required', 'string'],
             'address' => ['sometimes', 'required', 'string'],
             'birthdate' => ['sometimes', 'required', 'date_format:Y-m-d'],
         ];
