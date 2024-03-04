@@ -48,6 +48,7 @@ class ReaderControllerTest extends TestCase
                 ->where('phone_number', $givenThirdReader->phone_number)
                 ->where('address', $givenThirdReader->address)
                 ->where('birthdate', $givenThirdReader->birthdate->format('Y-m-d'))
+                ->where('token', $givenThirdReader->token)
                 ->etc()
             )
             ->has('data.1', fn (AssertableJson $json) => $json
@@ -56,6 +57,7 @@ class ReaderControllerTest extends TestCase
                 ->where('phone_number', $givenSecondReader->phone_number)
                 ->where('address', $givenSecondReader->address)
                 ->where('birthdate', $givenSecondReader->birthdate->format('Y-m-d'))
+                ->where('token', $givenSecondReader->token)
                 ->etc()
             )
             ->has('data.2', fn (AssertableJson $json) => $json
@@ -64,6 +66,7 @@ class ReaderControllerTest extends TestCase
                 ->where('phone_number', $givenFirstReader->phone_number)
                 ->where('address', $givenFirstReader->address)
                 ->where('birthdate', $givenFirstReader->birthdate->format('Y-m-d'))
+                ->where('token', $givenFirstReader->token)
                 ->etc()
             )
         );

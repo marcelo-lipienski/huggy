@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Reader extends Model
 {
@@ -22,6 +23,13 @@ class Reader extends Model
     protected $casts = [
         'birthdate' => 'datetime:Y-m-d',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Reader $reader) {
+            $reader->token = Str::random(30);
+        });
+    }
 
     /**
      * @return BelongsToMany<Book>
