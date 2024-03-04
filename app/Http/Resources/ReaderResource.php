@@ -25,6 +25,7 @@ class ReaderResource extends JsonResource
             'phone_number' => $this->phone_number,
             'address' => $this->address,
             'birthdate' => $this->birthdate->format('Y-m-d'),
+            'token' => $this->token,
         ];
     }
 }

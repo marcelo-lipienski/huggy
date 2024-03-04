@@ -3,6 +3,7 @@
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\ReaderController;
+use App\Http\Middleware\EnsureTokenIsValid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::resource('readers', ReaderController::class);
-Route::post('readers/{id}/book/{bookId}', [ReaderController::class, 'markAsRead']);
+Route::post('readers/{id}/book/{bookId}', [ReaderController::class, 'markAsRead'])->middleware([EnsureTokenIsValid::class]);
 Route::resource('publishers', PublisherController::class);
 Route::resource('books', BookController::class);
