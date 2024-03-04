@@ -23,13 +23,7 @@ class ReaderController extends Controller
 
     public function store(StoreReaderRequest $request): ReaderResource
     {
-        $reader = Reader::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'phone_number' => $request->input('phone_number'),
-            'address' => $request->input('address'),
-            'birthdate' => $request->input('birthdate'),
-        ]);
+        $reader = Reader::create($request->validated());
 
         CreateContact::dispatch($reader);
 
